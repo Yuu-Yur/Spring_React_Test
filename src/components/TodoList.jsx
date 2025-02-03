@@ -110,17 +110,23 @@ const TodoList = () => {
   useEffect(() => {
     if (isFetching || page >= totalPages) return; // ✅ 데이터 요청 중이거나 마지막 페이지이면 실행하지 않음
 
+    // IntersectionObserver 객체를 생성하여
+    // 특정 요소(observerRef.current)가 화면에 보일 때
+    // 실행되는 함수를 정의
     const observer = new IntersectionObserver((entries) => {
+      // entries[0].isIntersecting을 통해 요소가 뷰포트 안에 들어왔는지 확인
       if (entries[0].isIntersecting) {
-        setPage((prevPage) => prevPage + 1);
+        setPage((prevPage) => prevPage + 1); // ✅ 페이지 증가하여 데이터 로드 트리거
       }
     });
 
     if (observerRef.current) {
-      observer.observe(observerRef.current);
+      observer.observe(observerRef.current); // ✅ 관찰할 요소 지정
+      // 아래의 이요소를 보고 판단.
+      //   <div ref={observerRef} style={{ height: '20px' }} />
     }
 
-    return () => observer.disconnect();
+    return () => observer.disconnect(); // ✅ 컴포넌트 언마운트 시 옵저버 해제
   }, [isFetching, page, totalPages]);
 
   return (
