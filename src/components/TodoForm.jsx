@@ -35,6 +35,13 @@ const TodoForm = () => {
   // 🔹 폼 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
+    //참고,
+    // addTodoRequest(todo)는 createSlice에 의해 자동 생성된 액션을 반환합니다.
+    // {
+    //   type: "todo/addTodoRequest",
+    //   payload: todo  // 🔹 전달된 `todo` 객체가 payload에 저장됨
+    // }
+
     dispatch(addTodoRequest(todo));
 
     // ✅ 새로고침 없이 Redux 상태에 직접 추가하여 즉시 반영

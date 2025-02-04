@@ -40,6 +40,25 @@ function* fetchTodosSaga(action) {
         reset: action.payload?.reset,
       }),
     );
+
+    //참고1,
+    // fetchTodosSuccess({}) 호출시 -> fetchTodosSuccess(state, action) {
+    // 아래의 형태로 action은 자동생성 , 변경되고
+    // {
+    //   type: "todo/fetchTodosSuccess",
+    //   payload: {
+    //     todos: response.data?.dtoList || [],
+    //     total: response.data?.total || 0,
+    //     reset: action.payload?.reset,
+    //   }
+    // }
+    //참고2,
+    // state 는 그대로 전달.
+    // {
+    //   todos: response.data?.dtoList || [],
+    //   total: response.data?.total || 0,
+    //   reset: action.payload?.reset,
+    // }
   } catch (error) {
     // ✅ Redux 상태 업데이트 (실패)
     yield put(fetchTodosFailure('데이터를 불러오는 중 오류가 발생했습니다.'));
@@ -62,6 +81,15 @@ function* deleteTodoSaga(action) {
   }
 }
 // 🔹 3️⃣ 할 일 추가 (API 요청)
+// 참고,
+// action 객체 구조 형태
+// {
+//   type: "todo/addTodoRequest",
+//   payload: {
+//     title: "새로운 할 일",
+//     completed: false
+//   }
+// }
 function* addTodoSaga(action) {
   try {
     const response = yield call(axiosInstance.post, '/todo/', action.payload);

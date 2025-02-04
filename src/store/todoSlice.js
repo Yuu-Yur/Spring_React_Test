@@ -73,12 +73,28 @@ const todoSlice = createSlice({
       state.totalCount -= 1; // ✅ 총 개수 감소
     },
 
+    //참고
+    // action.payload를 사용하여
+    // 외부에서 전달된 데이터(error)를 state.error에 저장.
+    // 즉, 액션을 디스패치할 때 전달된 값을 받아서
+    // 상태를 업데이트하는 역할.
+    // 💡 예제: deleteTodoFailure("삭제 실패!")를 실행하면
+    // 내부적으로 자동으로 아래와 같은 액션이 생성됨:
+    // {
+    //   type: "todo/deleteTodoFailure",
+    //   payload: "삭제 실패!"  // 🔹 action.payload에 저장됨
+    // }
     // 🔹 8️⃣ 할 일 삭제 실패 (에러 저장)
     deleteTodoFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
     },
 
+    //참고
+    // addTodoRequest()를 실행하면 자동으로 아래 액션이 생성됨:
+    // {
+    //   type: "todo/addTodoRequest"
+    // }
     // 🔹 9️⃣ 할 일 추가 요청 (로딩 상태 true로 변경)
     addTodoRequest(state) {
       state.loading = true;
