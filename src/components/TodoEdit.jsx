@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Container } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
-import axiosInstance from './axiosInstance';
+import axiosInstance from '../util/axiosInstance';
 
 const TodoEdit = () => {
   const { tno } = useParams();
@@ -65,7 +65,7 @@ const TodoEdit = () => {
             name="writer"
             value={todo.writer}
             onChange={handleChange}
-            required
+            disabled
           />
         </Form.Group>
         <Form.Group className="mb-3">

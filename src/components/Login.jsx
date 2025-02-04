@@ -3,7 +3,7 @@ import { Form, Button, Container } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 //추가, 로그인 정보 표기
-import { useAuth } from './AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();

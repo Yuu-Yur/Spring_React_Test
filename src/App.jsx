@@ -5,7 +5,7 @@ import Login from './components/Login';
 import Home from './components/Home';
 import LoginSuccess from './components/LoginSuccess';
 //추가, 로그인 정보 표기
-import { AuthProvider } from './components/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import TodoList from './components/TodoList';
 import TodoEdit from './components/TodoEdit';
 

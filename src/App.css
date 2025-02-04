@@ -5,3 +5,40 @@
   font-weight: bold;
   padding: 16px;
 }
+.long-text {
+  max-width: 200px; /* ✅ 최대 너비 설정 */
+  word-break: break-word; /* ✅ 긴 단어가 있을 경우 자동 줄넘김 */
+  white-space: normal; /* ✅ 공백이 있을 경우 줄넘김 허용 */
+}
+.fixed-width {
+  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .table-title {
+    width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .table-writer {
+    width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-title,
+  .table-writer {
+    width: 100%;
+    white-space: normal; /* ✅ 작은 화면에서는 줄바꿈 허용 */
+    overflow-wrap: break-word; /* ✅ 단어가 길면 줄바꿈 */
+    text-overflow: clip; /* ✅ "..." 대신 전체 표시 */
+  }
+}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 //추가, 로그인 정보 표기
-import { useAuth } from './AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button, Navbar, Nav } from 'react-bootstrap';
 import TodoList from './TodoList';

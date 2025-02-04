@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
-import axiosInstance from './axiosInstance';
+import { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTodoRequest } from '../store/todoSlice';
+import { useAuth } from '../contexts/AuthContext'; // ✅ 로그인 정보 가져오기
+import { fetchTodosRequest, setPage } from '../store/todoSlice';
 
-const TodoForm = ({ onTodoAdded }) => {
+// const TodoForm = ({ onTodoAdded }) => {
+const TodoForm = () => {
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.todo);
+  const { user } = useAuth(); // ✅ 로그인한 유저 정보 가져오기
+
+  // ✅ 오늘 날짜 구하기 (YYYY-MM-DD)
+  const today = new Date().toISOString().split('T')[0];
+
   // 🔹 상태 관리
   const [todo, setTodo] = useState({
     title: '',
-    writer: '',
-    dueDate: '',
+    writer: user?.mid || '', // ✅ 로그인한 사용자 ID 자동 입력
+    dueDate: today, // ✅ 기본값을 오늘 날짜로 설정
     complete: false,
   });
-  const [error, setError] = useState(null);
 
   // 🔹 입력값 변경 처리
   const handleChange = (e) => {
@@ -25,33 +35,26 @@ const TodoForm = ({ onTodoAdded }) => {
   // 🔹 폼 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    dispatch(addTodoRequest(todo));
 
-    try {
-      const response = await axiosInstance.post('/todo/', todo);
-      console.log('등록된 할 일 ID:', response.data.tno);
+    // ✅ 새로고침 없이 Redux 상태에 직접 추가하여 즉시 반영
+    setTimeout(() => {
+      dispatch(setPage(1)); // ✅ 삭제 후 페이지를 초기화하여 스크롤 영향 방지
+      dispatch(fetchTodosRequest({ reset: true })); // ✅ 최신 데이터 불러오기 (기존 데이터 유지)
+    }, 100);
 
-      // 성공 시 목록 업데이트 요청
-      onTodoAdded();
-
-      // 입력 필드 초기화
-      setTodo({
-        title: '',
-        writer: '',
-        dueDate: '',
-        complete: false,
-      });
-
-      alert('할 일이 성공적으로 추가되었습니다.');
-    } catch (error) {
-      setError('할 일 추가 중 오류가 발생했습니다.');
-      console.error('Error adding todo:', error);
-    }
+    // 입력 필드 초기화
+    setTodo({
+      title: '',
+      writer: user?.mid || '',
+      dueDate: today,
+      complete: false,
+    });
   };
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center">새로운 할 일 추가</h2>
+      <h2 className="text-center">새로운 할 일 추가 (Redux + Saga)</h2>
       {error && <p className="text-center text-danger">{error}</p>}
 
       <Form onSubmit={handleSubmit}>
@@ -73,7 +76,7 @@ const TodoForm = ({ onTodoAdded }) => {
               value={todo.writer}
               onChange={handleChange}
               placeholder="작성자 입력"
-              required
+              disabled
             />
           </Col>
           <Col md={3}>
@@ -82,6 +85,7 @@ const TodoForm = ({ onTodoAdded }) => {
               name="dueDate"
               value={todo.dueDate}
               onChange={handleChange}
+              min={today} // ✅ 이전 날짜 선택 불가능
               required
             />
           </Col>
