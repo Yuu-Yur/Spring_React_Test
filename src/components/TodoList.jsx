@@ -57,21 +57,49 @@ const TodoList = () => {
     }
   };
   // 🔹 무한 스크롤 (IntersectionObserver 활용)
+  // useEffect(() => {
+  //   if (page >= totalPages) return; // 마지막 페이지면 더 이상 요청 안함
+
+  //   const observer = new IntersectionObserver((entries) => {
+  //     if (entries[0].isIntersecting) {
+  //       dispatch(setPage(page + 1)); // 페이지 증가하여 다음 데이터 불러오기
+  //       dispatch(fetchTodosRequest({ reset: false })); // 새 데이터 추가
+  //     }
+  //   });
+
+  //   if (observerRef.current) {
+  //     observer.observe(observerRef.current);
+
+  //     return () => observer.disconnect(); // ✅ 옵저버가 실행된 경우만 disconnect 실행
+  //   }
+  // }, [page, totalPages, dispatch]);
+  //
   useEffect(() => {
-    if (page >= totalPages) return; // 마지막 페이지면 더 이상 요청 안함
+    if (page >= totalPages) return; // 마지막 페이지면 요청 중단
+
+    let timeoutId = null; // 타이머 ID 저장
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
-        dispatch(setPage(page + 1)); // 페이지 증가하여 다음 데이터 불러오기
-        dispatch(fetchTodosRequest({ reset: false })); // 새 데이터 추가
+        console.log('📌 스크롤 감지됨! 1초 후 데이터 요청 예정...');
+
+        // ✅ 1초(1000ms) 후에 데이터 요청
+        timeoutId = setTimeout(() => {
+          dispatch(setPage(page + 1)); // 페이지 증가
+          dispatch(fetchTodosRequest({ reset: false })); // 새 데이터 추가 요청
+          console.log('✅ 1초 후 새로운 데이터 요청 완료');
+        }, 1000);
       }
     });
 
     if (observerRef.current) {
       observer.observe(observerRef.current);
-
-      return () => observer.disconnect(); // ✅ 옵저버가 실행된 경우만 disconnect 실행
     }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId); // ✅ 불필요한 중복 요청 방지
+      observer.disconnect();
+    };
   }, [page, totalPages, dispatch]);
 
   return (
