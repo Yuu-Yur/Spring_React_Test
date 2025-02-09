@@ -46,7 +46,7 @@ const TodoForm = () => {
 
     // ✅ 새로고침 없이 Redux 상태에 직접 추가하여 즉시 반영
     setTimeout(() => {
-      dispatch(setPage(1)); // ✅ 삭제 후 페이지를 초기화하여 스크롤 영향 방지
+      // dispatch(setPage(1)); // ✅ 삭제 후 페이지를 초기화하여 스크롤 영향 방지
       dispatch(fetchTodosRequest({ reset: true })); // ✅ 최신 데이터 불러오기 (기존 데이터 유지)
     }, 100);
 

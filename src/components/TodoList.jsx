@@ -52,7 +52,6 @@ const TodoList = () => {
 
   // 🔹 검색 버튼 클릭 시 데이터 로드
   const handleSearch = () => {
-    dispatch(setPage(1));
     dispatch(fetchTodosRequest({ reset: true }));
   };
 

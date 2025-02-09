@@ -27,7 +27,7 @@ const initialState = {
   loading: false,
   error: null,
   searchParams: {
-    type: '', // 검색 타입 (제목, 내용 등)
+    type: 'TWC', // 검색 타입 (제목, 내용 등)
     keyword: '', // 검색 키워드
     from: '', // 시작 날짜
     to: '', // 종료 날짜
@@ -75,7 +75,10 @@ const todoSlice = createSlice({
 
     // 커서_기반_코드
     fetchTodosSuccess: (state, action) => {
-      state.todos = [...state.todos, ...action.payload.todos]; // ✅ 데이터 추가
+      // state.todos = [...state.todos, ...action.payload.todos]; // ✅ 데이터 추가
+      state.todos = action.payload.reset
+        ? action.payload.todos
+        : [...state.todos, ...action.payload.todos]; // ✅ 기존 데이터에 추가
       state.cursor = action.payload.nextCursor; // ✅ 다음 커서 업데이트
       state.hasMore = action.payload.hasNext; // ✅ 다음 데이터 여부
       state.total = action.payload.total;
@@ -87,16 +90,18 @@ const todoSlice = createSlice({
       state.error = action.payload;
     },
 
-    // 🔹 4️⃣ 페이지 변경 (무한 스크롤 또는 검색 시 사용)
-    setPage(state, action) {
-      state.page = action.payload;
+    // ✅ 검색 필터 설정
+    // 커서_기반_코드
+    setSearchParams: (state, action) => {
+      state.searchParams = action.payload;
     },
 
     // 🔹 5️⃣ 검색 필터 설정 (검색어 입력 시 호출)
-    setSearchParams(state, action) {
-      state.searchParams = { ...state.searchParams, ...action.payload };
-      state.page = 1; // ✅ 검색 시 페이지 초기화 (1페이지부터 다시 검색)
-    },
+    // 페이징_기반_코드
+    // setSearchParams(state, action) {
+    //   state.searchParams = { ...state.searchParams, ...action.payload };
+    //   state.page = 1; // ✅ 검색 시 페이지 초기화 (1페이지부터 다시 검색)
+    // },
 
     // 🔹 6️⃣ 할 일 삭제 요청 (로딩 상태 true로 변경)
     deleteTodoRequest(state) {

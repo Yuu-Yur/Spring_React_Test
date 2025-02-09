@@ -45,13 +45,18 @@ import {
 // 커서_기반_코드
 function* fetchTodosSaga(action) {
   try {
-    const { cursor } = yield select((state) => state.todo); // ✅ 현재 커서 값 가져오기
+    const { cursor, searchParams } = yield select((state) => state.todo); // ✅ 현재 커서 값 가져오기
 
     // ✅ API 요청 (GET 요청으로 할 일 목록 조회)
     const response = yield call(axiosInstance.get, '/todo/list2', {
       params: {
         size: 10, // ✅ 한 번에 가져올 개수
         cursor: cursor, // ✅ 커서 기반 페이지네이션 적용
+        type: searchParams.type, // ✅ 검색 유형 (제목, 내용 등)
+        keyword: searchParams.keyword, // ✅ 검색어
+        from: searchParams.from,
+        to: searchParams.to,
+        completed: searchParams.completed,
       },
     });
 
@@ -62,6 +67,7 @@ function* fetchTodosSaga(action) {
         total: response.data?.total || 0,
         nextCursor: response.data?.nextCursor || null, // ✅ 다음 커서 업데이트
         hasNext: response.data?.hasNext || false, // ✅ 더 많은 데이터 존재 여부
+        reset: action.payload?.reset, // ✅ 초기 로딩 여부
       }),
     );
 
