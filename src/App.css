@@ -42,3 +42,23 @@
     text-overflow: clip; /* ✅ "..." 대신 전체 표시 */
   }
 }
+
+/* 사이드 메뉴 - 기본 레이아웃 */
+.side-menu {
+  overflow-y: auto; /* 스크롤 가능 */
+}
+
+/* 큰 화면 (데스크톱)에서 높이를 화면 전체로 설정 */
+@media (min-width: 768px) {
+  .side-menu {
+    min-height: 100vh; /* 화면 전체 높이 */
+  }
+}
+
+/* 작은 화면 (모바일)에서 높이를 콘텐츠에 맞게 조정 */
+@media (max-width: 767px) {
+  .side-menu {
+    height: auto; /* 높이를 콘텐츠 크기에 맞춤 */
+    min-height: auto; /* 최소 높이 제한 제거 */
+  }
+}

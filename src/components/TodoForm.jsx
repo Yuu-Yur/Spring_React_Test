@@ -3,12 +3,12 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTodoRequest } from '../store/todoSlice';
 import { useAuth } from '../contexts/AuthContext'; // ✅ 로그인 정보 가져오기
-import { fetchTodosRequest, setPage } from '../store/todoSlice';
+import { fetchTodosRequest } from '../store/todoSlice';
 
 // const TodoForm = ({ onTodoAdded }) => {
 const TodoForm = () => {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.todo);
+  const { error } = useSelector((state) => state.todo);
   const { user } = useAuth(); // ✅ 로그인한 유저 정보 가져오기
 
   // ✅ 오늘 날짜 구하기 (YYYY-MM-DD)
