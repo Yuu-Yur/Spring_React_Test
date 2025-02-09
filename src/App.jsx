@@ -8,6 +8,7 @@ import LoginSuccess from './components/LoginSuccess';
 import { AuthProvider } from './contexts/AuthContext';
 import TodoList from './components/TodoList';
 import TodoEdit from './components/TodoEdit';
+import AiTest from './components/AiTest';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/loginSuccess" element={<LoginSuccess />} />
           <Route path="/list" element={<TodoList />} />
           <Route path="/todo/edit/:tno" element={<TodoEdit />} />
+          <Route path="/ai" element={<AiTest />} />
         </Routes>
       </AuthProvider>
     </>

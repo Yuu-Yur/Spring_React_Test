@@ -1,24 +1,19 @@
-//추가, 로그인 정보 표기
-import { useAuth } from '../contexts/AuthContext';
 import { Container } from 'react-bootstrap';
-import TodoList from './TodoList';
-import Header from './Header';
+import Header from '../components/Header'; // 공통 Header 사용
+import { useAuth } from '../contexts/AuthContext';
 
-const Home = () => {
-  //추가, 로그인 정보 표기
+const AiTest = () => {
   const { user } = useAuth(); // Context에서 user 정보 가져오기
 
   return (
     <>
-      {/* 공통헤더 */}
-      <Header />
-      {/* ✅ 홈 화면 */}
+      <Header /> {/* ✅ 공통 헤더 추가 */}
       <Container className="mt-5 text-center">
-        <h2>홈</h2>
+        <h2>AI 테스트 페이지</h2>
         {user ? (
           <>
             <div>
-              <TodoList />
+              <p>이곳에서 AI 모델을 테스트할 수 있습니다.</p>
             </div>
           </>
         ) : (
@@ -29,4 +24,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default AiTest;
