@@ -1,14 +1,31 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 // ✅ 초기 상태 정의 (Redux Store에서 관리하는 기본 값)
+// 페이징_기반_코드
+// const initialState = {
+//   todos: [], // 할 일 목록 저장
+//   page: 1, // 현재 페이지 번호
+//   size: 10, // 한 번에 불러올 개수
+//   totalPages: 1, // 전체 페이지 수
+//   totalCount: 0, // 전체 할 일 개수
+//   loading: false, // 로딩 상태
+//   error: null, // 에러 메시지
+//   searchParams: {
+//     type: '', // 검색 타입 (제목, 내용 등)
+//     keyword: '', // 검색 키워드
+//     from: '', // 시작 날짜
+//     to: '', // 종료 날짜
+//     completed: '', // 완료 여부
+//   },
+// };
+// 커서_기반_코드
 const initialState = {
-  todos: [], // 할 일 목록 저장
-  page: 1, // 현재 페이지 번호
-  size: 10, // 한 번에 불러올 개수
-  totalPages: 1, // 전체 페이지 수
-  totalCount: 0, // 전체 할 일 개수
-  loading: false, // 로딩 상태
-  error: null, // 에러 메시지
+  todos: [],
+  total: 0,
+  cursor: null, // ✅ 커서 상태 추가 (최초 요청시 null)
+  hasMore: true, // ✅ 추가 데이터 여부
+  loading: false,
+  error: null,
   searchParams: {
     type: '', // 검색 타입 (제목, 내용 등)
     keyword: '', // 검색 키워드
@@ -24,25 +41,46 @@ const todoSlice = createSlice({
   initialState, // 위에서 정의한 초기 상태
   reducers: {
     // 🔹 1️⃣ 할 일 목록 조회 요청 (로딩 상태 true로 변경)
-    fetchTodosRequest(state) {
+    // 페이징_기반_코드
+    // fetchTodosRequest(state) {
+    //   state.loading = true;
+    //   state.error = null; // ✅ 기존 오류 초기화
+    // },
+
+    // 커서_기반_코드
+    fetchTodosRequest: (state, action) => {
+      if (action.payload?.reset) {
+        state.todos = []; // ✅ 초기 로딩 시 기존 데이터 초기화
+        state.cursor = null; // ✅ 커서 초기화
+        state.hasMore = true;
+      }
       state.loading = true;
-      state.error = null; // ✅ 기존 오류 초기화
+      state.error = null;
     },
 
+    // 페이징_기반_코드
     // 🔹 2️⃣ 할 일 목록 조회 성공
-    fetchTodosSuccess(state, action) {
-      state.loading = false; // ✅ 로딩 완료
-      const newTodos = action.payload.todos || []; // 새로운 데이터 가져오기
+    // fetchTodosSuccess(state, action) {
+    //   state.loading = false; // ✅ 로딩 완료
+    //   const newTodos = action.payload.todos || []; // 새로운 데이터 가져오기
 
-      state.todos = action.payload.reset
-        ? newTodos // ✅ `reset`이 true이면 기존 데이터를 초기화
-        : [...state.todos, ...newTodos].filter(
-            (v, i, arr) => arr.findIndex((t) => t.tno === v.tno) === i,
-          ); // ✅ 기존 데이터 유지 & 중복 제거
-      state.totalPages = Math.ceil(action.payload.total / state.size);
-      state.totalCount = action.payload.total;
+    //   state.todos = action.payload.reset
+    //     ? newTodos // ✅ `reset`이 true이면 기존 데이터를 초기화
+    //     : [...state.todos, ...newTodos].filter(
+    //         (v, i, arr) => arr.findIndex((t) => t.tno === v.tno) === i,
+    //       ); // ✅ 기존 데이터 유지 & 중복 제거
+    //   state.totalPages = Math.ceil(action.payload.total / state.size);
+    //   state.totalCount = action.payload.total;
+    // },
+
+    // 커서_기반_코드
+    fetchTodosSuccess: (state, action) => {
+      state.todos = [...state.todos, ...action.payload.todos]; // ✅ 데이터 추가
+      state.cursor = action.payload.nextCursor; // ✅ 다음 커서 업데이트
+      state.hasMore = action.payload.hasNext; // ✅ 다음 데이터 여부
+      state.total = action.payload.total;
+      state.loading = false;
     },
-
     // 🔹 3️⃣ 할 일 목록 조회 실패 (에러 저장)
     fetchTodosFailure(state, action) {
       state.loading = false;

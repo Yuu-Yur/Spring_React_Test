@@ -14,21 +14,44 @@ import {
 } from './todoSlice';
 
 // 🔹 1️⃣ 할 일 목록 조회 (API 요청)
+// 페이징_기반_코드
+// function* fetchTodosSaga(action) {
+//   try {
+//     // ✅ 현재 Redux 상태 가져오기
+//     const { page, size, searchParams } = yield select((state) => state.todo);
+
+//     // ✅ API 요청 (GET 요청으로 할 일 목록 조회)
+//     const response = yield call(axiosInstance.get, '/todo/list', {
+//       params: {
+//         page,
+//         size,
+//         type: searchParams.type,
+//         keyword: searchParams.keyword,
+//         from: searchParams.from,
+//         to: searchParams.to,
+//         completed: searchParams.completed,
+//       },
+//     });
+
+//     // ✅ Redux 상태 업데이트 (성공)
+//     yield put(
+//       fetchTodosSuccess({
+//         todos: response.data?.dtoList || [],
+//         total: response.data?.total || 0,
+//         reset: action.payload?.reset,
+//       }),
+//     );
+
+// 커서_기반_코드
 function* fetchTodosSaga(action) {
   try {
-    // ✅ 현재 Redux 상태 가져오기
-    const { page, size, searchParams } = yield select((state) => state.todo);
+    const { cursor } = yield select((state) => state.todo); // ✅ 현재 커서 값 가져오기
 
     // ✅ API 요청 (GET 요청으로 할 일 목록 조회)
-    const response = yield call(axiosInstance.get, '/todo/list', {
+    const response = yield call(axiosInstance.get, '/todo/list2', {
       params: {
-        page,
-        size,
-        type: searchParams.type,
-        keyword: searchParams.keyword,
-        from: searchParams.from,
-        to: searchParams.to,
-        completed: searchParams.completed,
+        size: 10, // ✅ 한 번에 가져올 개수
+        cursor: cursor, // ✅ 커서 기반 페이지네이션 적용
       },
     });
 
@@ -37,7 +60,8 @@ function* fetchTodosSaga(action) {
       fetchTodosSuccess({
         todos: response.data?.dtoList || [],
         total: response.data?.total || 0,
-        reset: action.payload?.reset,
+        nextCursor: response.data?.nextCursor || null, // ✅ 다음 커서 업데이트
+        hasNext: response.data?.hasNext || false, // ✅ 더 많은 데이터 존재 여부
       }),
     );
 
@@ -52,6 +76,7 @@ function* fetchTodosSaga(action) {
     //     reset: action.payload?.reset,
     //   }
     // }
+
     //참고2,
     // state 는 그대로 전달.
     // {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import {
   Table,
   Button,
@@ -27,16 +27,27 @@ const TodoList = () => {
   const observerRef = useRef(null);
 
   // Redux 상태를 읽음 (store에서 state를 가져오는 역할)
-  const { todos, page, totalPages, totalCount, loading, searchParams } =
-    useSelector((state) => state.todo);
+
+  // 페이징_기반_코드
+  // const { todos, page, totalPages, totalCount, loading, searchParams } =
+  // 커서_기반_코드
+  const { todos, loading, searchParams, hasMore, total } = useSelector(
+    (state) => state.todo,
+  );
 
   // ✅ 최초 실행 및 검색 후 데이터 리셋 (전체 목록 로드)
-  useEffect(() => {
-    dispatch(setPage(1)); // 페이지를 1로 설정하여 첫 번째 데이터를 불러옴
+  // 페이징_기반_코드
+  // useEffect(() => {
+  //   dispatch(setPage(1)); // 페이지를 1로 설정하여 첫 번째 데이터를 불러옴
 
-    setTimeout(() => {
-      dispatch(fetchTodosRequest({ reset: true }));
-    }, 50); // ✅ 약간의 지연을 추가하여 `page` 업데이트 후 API 요청
+  //   setTimeout(() => {
+  //     dispatch(fetchTodosRequest({ reset: true }));
+  //   }, 50); // ✅ 약간의 지연을 추가하여 `page` 업데이트 후 API 요청
+  // }, [dispatch]);
+
+  // 커서_기반_코드
+  useEffect(() => {
+    dispatch(fetchTodosRequest({ reset: true })); // ✅ 초기 데이터 요청
   }, [dispatch]);
 
   // 🔹 검색 버튼 클릭 시 데이터 로드
@@ -74,33 +85,51 @@ const TodoList = () => {
   //   }
   // }, [page, totalPages, dispatch]);
   //
-  useEffect(() => {
-    if (page >= totalPages) return; // 마지막 페이지면 요청 중단
 
-    let timeoutId = null; // 타이머 ID 저장
+  // 페이징_기반_코드
+  // useEffect(() => {
+  //   if (page >= totalPages) return; // 마지막 페이지면 요청 중단
 
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        console.log('📌 스크롤 감지됨! 1초 후 데이터 요청 예정...');
+  //   let timeoutId = null; // 타이머 ID 저장
 
-        // ✅ 1초(1000ms) 후에 데이터 요청
-        timeoutId = setTimeout(() => {
-          dispatch(setPage(page + 1)); // 페이지 증가
-          dispatch(fetchTodosRequest({ reset: false })); // 새 데이터 추가 요청
-          console.log('✅ 1초 후 새로운 데이터 요청 완료');
-        }, 1000);
-      }
-    });
+  //   const observer = new IntersectionObserver((entries) => {
+  //     if (entries[0].isIntersecting) {
+  //       console.log('📌 스크롤 감지됨! 1초 후 데이터 요청 예정...');
 
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
-    }
+  //       // ✅ 1초(1000ms) 후에 데이터 요청
+  //       timeoutId = setTimeout(() => {
+  //         dispatch(setPage(page + 1)); // 페이지 증가
+  //         dispatch(fetchTodosRequest({ reset: false })); // 새 데이터 추가 요청
+  //         console.log('✅ 1초 후 새로운 데이터 요청 완료');
+  //       }, 1000);
+  //     }
+  //   });
 
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId); // ✅ 불필요한 중복 요청 방지
-      observer.disconnect();
-    };
-  }, [page, totalPages, dispatch]);
+  //   if (observerRef.current) {
+  //     observer.observe(observerRef.current);
+  //   }
+  //   return () => {
+  //     if (timeoutId) clearTimeout(timeoutId); // ✅ 불필요한 중복 요청 방지
+  //     observer.disconnect();
+  //   };
+  // }, [page, totalPages, dispatch]);
+
+  // 커서_기반_코드
+  // ✅ 무한 스크롤 감지 로직
+  const observer = useRef();
+  const lastTodoElementRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          dispatch(fetchTodosRequest());
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore, dispatch],
+  );
 
   return (
     <Container className="mt-4">
@@ -146,7 +175,7 @@ const TodoList = () => {
         </Row>
       </Form>
 
-      <p className="text-center text-muted">총 {totalCount}개의 검색 결과</p>
+      <p className="text-center text-muted">총 {total}개의 검색 결과</p>
 
       <TodoForm />
 
@@ -172,7 +201,10 @@ const TodoList = () => {
         <tbody>
           {todos.length > 0 ? (
             todos.map((todo, index) => (
-              <tr key={todo.tno}>
+              <tr
+                key={todo.tno}
+                ref={index === todos.length - 1 ? lastTodoElementRef : null}
+              >
                 <td>{index + 1}</td>
                 <td className="long-text">{todo.title}</td>
                 <td className="long-text">{todo.writer}</td>
