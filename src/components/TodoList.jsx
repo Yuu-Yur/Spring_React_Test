@@ -15,7 +15,7 @@ import {
   setPage,
   setSearchParams,
   deleteTodoRequest,
-} from '../store/todoSlice';
+} from '../store/todo/todoSlice';
 import TodoForm from './TodoForm';
 import ScrollToTopButton from './ScrollToTopButton';
 import '../App.css';

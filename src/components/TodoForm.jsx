@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { addTodoRequest } from '../store/todoSlice';
+import { addTodoRequest } from '../store/todo/todoSlice';
 import { useAuth } from '../contexts/AuthContext'; // ✅ 로그인 정보 가져오기
-import { fetchTodosRequest } from '../store/todoSlice';
+import { fetchTodosRequest } from '../store/todo/todoSlice';
 
 // const TodoForm = ({ onTodoAdded }) => {
 const TodoForm = () => {

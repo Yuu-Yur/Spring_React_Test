@@ -1,5 +1,5 @@
 import { call, put, takeLatest, select } from 'redux-saga/effects';
-import axiosInstance from '../util/axiosInstance';
+import axiosInstance from '../../util/axiosInstance';
 import {
   fetchTodosRequest,
   fetchTodosSuccess,
