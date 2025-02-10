@@ -6,13 +6,20 @@ const ToolClassification = () => {
   const dispatch = useDispatch();
   const { loading, result, error } = useSelector((state) => state.ai);
   const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null); // ✅ 미리보기 상태 추가
 
-  // 파일 선택 핸들러
+  // ✅ 파일 선택 핸들러
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+    setFile(selectedFile);
+
+    if (selectedFile) {
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreview(objectUrl); // ✅ 미리보기 URL 설정
+    }
   };
 
-  // 업로드 핸들러
+  // ✅ 업로드 핸들러
   const handleUpload = () => {
     if (!file) {
       alert('파일을 선택해주세요.');
@@ -29,8 +36,17 @@ const ToolClassification = () => {
       <h3>🔧 공구 툴 이미지 분류</h3>
       <p>AI 모델이 공구 이미지를 분석하고 분류합니다.</p>
 
-      {/* 파일 업로드 */}
+      {/* ✅ 파일 업로드 */}
       <input type="file" accept="image/*" onChange={handleFileChange} />
+
+      {/* ✅ 이미지 미리보기 */}
+      {preview && (
+        <div className="preview-container">
+          <h4>📷 미리보기</h4>
+          <img src={preview} alt="미리보기" className="image-preview" />
+        </div>
+      )}
+
       <button onClick={handleUpload} disabled={loading}>
         {loading ? '업로드 중...' : '이미지 업로드'}
       </button>
@@ -43,7 +59,7 @@ const ToolClassification = () => {
             <strong>파일명:</strong> {result.filename}
           </p>
           <p>
-            <strong>예측된 클래스:</strong> {result.predicted_class}
+            <strong>예측된 클래스:</strong> {result.predictedClass}
           </p>
           <p>
             <strong>클래스 인덱스:</strong> {result.class_index}
