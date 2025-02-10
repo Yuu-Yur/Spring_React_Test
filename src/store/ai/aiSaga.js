@@ -9,7 +9,7 @@ import axiosInstance from '../../util/axiosInstance';
 
 // API 요청 함수
 function uploadImageAPI(formData) {
-  return axiosInstance.post('/ai/predict', formData, {
+  return axiosInstance.post('/ai/tool_predict', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
