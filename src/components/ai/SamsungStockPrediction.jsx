@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStockDataRequest, predictRequest } from '../../store/ai/aiSlice';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+
+// ✅ 주말을 제외한 다음 영업일(주중) 계산
+const getNextBusinessDay = (dateStr) => {
+  let date = new Date(dateStr);
+  do {
+    date.setDate(date.getDate() + 1);
+  } while (date.getDay() === 0 || date.getDay() === 6); // 0: 일요일, 6: 토요일
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD 형식 반환
+};
 
 const SamsungStockPrediction = () => {
   const dispatch = useDispatch();
@@ -56,6 +74,25 @@ const SamsungStockPrediction = () => {
       }),
     );
   };
+
+  // ✅ 그래프 데이터 구성
+  const lastDate =
+    stockData.length > 0 ? stockData[stockData.length - 1].Date : '';
+  const nextBusinessDay = lastDate ? getNextBusinessDay(lastDate) : '';
+
+  const chartData = stockData.map((item) => ({
+    date: item.Date,
+    close: parseFloat(item.Close),
+  }));
+
+  if (nextBusinessDay && predictions['GRU']) {
+    chartData.push({
+      date: nextBusinessDay,
+      RNN: parseFloat(predictions['RNN']) || null,
+      LSTM: parseFloat(predictions['LSTM']) || null,
+      GRU: parseFloat(predictions['GRU']) || null,
+    });
+  }
 
   return (
     <div>
@@ -137,6 +174,45 @@ const SamsungStockPrediction = () => {
           {model}: {predictions[model]}
         </h3>
       ))}
+
+      {/* ✅ 그래프 표시 */}
+      {stockData.length > 0 && (
+        <div>
+          <h2>📉 주가 데이터 그래프</h2>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={chartData}>
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="close"
+                stroke="#8884d8"
+                name="실제 종가"
+              />
+              <Line
+                type="monotone"
+                dataKey="RNN"
+                stroke="#ff0000"
+                name="RNN 예측"
+              />
+              <Line
+                type="monotone"
+                dataKey="LSTM"
+                stroke="#00ff00"
+                name="LSTM 예측"
+              />
+              <Line
+                type="monotone"
+                dataKey="GRU"
+                stroke="#0000ff"
+                name="GRU 예측"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };
