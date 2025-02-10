@@ -29,7 +29,7 @@ const WasteApplianceClassification = () => {
 
     const formData = new FormData();
     formData.append('image', file);
-    dispatch(uploadImageRequest(formData));
+    dispatch(uploadImageRequest({ formData, type: 2 }));
   };
 
   return (
