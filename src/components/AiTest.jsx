@@ -7,6 +7,7 @@ import SamsungStockPrediction from './ai/SamsungStockPrediction';
 import AnimalImageClassification from './ai/AnimalImageClassification';
 import WasteApplianceClassification from './ai/WasteApplianceClassification';
 import '../App.css';
+import YoloClassification from './ai/YoloClassification';
 
 const AiTest = () => {
   const { user } = useAuth(); // Context에서 user 정보 가져오기
@@ -22,6 +23,8 @@ const AiTest = () => {
         return <AnimalImageClassification />;
       case 4:
         return <WasteApplianceClassification />;
+      case 5:
+        return <YoloClassification />;
       default:
         return <ToolClassification />;
     }
@@ -69,6 +72,12 @@ const AiTest = () => {
                     active={selectedMenu === 4}
                   >
                     4. 폐가전 이미지 분류
+                  </Nav.Link>
+                  <Nav.Link
+                    onClick={() => setSelectedMenu(5)}
+                    active={selectedMenu === 5}
+                  >
+                    5. Yolov8 분류
                   </Nav.Link>
                 </Nav>
               </Col>
