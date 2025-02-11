@@ -1,5 +1,5 @@
 import React from 'react';
-import useYoloClassification from '../../store/ai/useYoloClassification.js';
+import useYoloClassification from '../../store/ai/useYoloClassification'; // ✅ 경로 확인
 import './css/ai.css';
 
 const YoloClassification = () => {
