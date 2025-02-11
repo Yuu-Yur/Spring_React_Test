@@ -59,7 +59,7 @@ const ToolClassification = () => {
             <strong>파일명:</strong> {result.filename}
           </p>
           <p>
-            <strong>예측된 클래스:</strong> {result.predictedClass}
+            <strong>예측된 클래스:</strong> {result.predicted_class}
           </p>
           <p>
             <strong>클래스 인덱스:</strong> {result.class_index}
