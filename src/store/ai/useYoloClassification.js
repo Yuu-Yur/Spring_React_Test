@@ -61,7 +61,15 @@ const useYoloClassification = () => {
       setPreview(response.data.file_url);
       setDownloadUrl(response.data.download_url);
     } catch (error) {
-      console.error('업로드 실패:', error);
+      console.error(
+        '❌ 파일 업로드 오류:',
+        error.response ? error.response.data : error.message,
+      );
+      alert(
+        `파일 업로드 실패: ${
+          error.response ? error.response.data : error.message
+        }`,
+      );
     }
   };
 

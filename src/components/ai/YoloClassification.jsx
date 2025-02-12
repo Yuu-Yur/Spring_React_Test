@@ -99,7 +99,7 @@ const YoloClassification = () => {
       )}
 
       {/* 에러 표시 */}
-      {error && <p className="error">❌ 오류: {error}</p>}
+      {/* {error && <p className="error">❌ 오류: {error}</p>} */}
     </div>
   );
 };
