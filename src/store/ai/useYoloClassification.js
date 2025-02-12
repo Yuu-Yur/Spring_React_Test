@@ -13,7 +13,7 @@ const useYoloClassification = () => {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [downloadUrl, setDownloadUrl] = useState(null);
-  const [result, setResult] = useState(null); // ✅ 추가됨
+  const [result, setResult] = useState({}); // ✅ 추가됨
 
   // ✅ 로컬 스토리지에서 액세스 토큰 가져오기 (최적화)
   const getAccessToken = () => localStorage.getItem('accessToken');
@@ -89,6 +89,11 @@ const useYoloClassification = () => {
         });
 
         setDownloadUrl(data.download_url); // ✅ 수정됨
+
+        // ✅ file_url이 존재할 경우만 match() 실행
+        if (data.file_url && data.file_url.match(/\.(jpeg|jpg|png|gif)$/i)) {
+          setPreview(data.file_url);
+        }
       }
     });
 
@@ -104,6 +109,7 @@ const useYoloClassification = () => {
     downloadUrl,
     setDownloadUrl, // ✅ 추가됨
     result,
+    setResult,
     error,
     loading,
     handleFileChange,

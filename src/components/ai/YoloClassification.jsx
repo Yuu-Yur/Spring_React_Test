@@ -37,6 +37,11 @@ const YoloClassification = () => {
       setStatusMessage('✅ 분석 완료! 다운로드 가능');
 
       setDownloadUrl(data.download_url);
+
+      // ✅ 이미지 파일인 경우 미리보기 표시
+      if (data.file_url && data.file_url.match(/\.(jpeg|jpg|png|gif)$/i)) {
+        setResult({ ...result, preview: data.file_url });
+      }
     });
 
     // ✅ Cleanup: 컴포넌트 언마운트 시 이벤트 리스너 및 소켓 해제
