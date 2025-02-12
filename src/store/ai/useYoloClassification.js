@@ -9,10 +9,11 @@ const socket = io('http://localhost:5000');
 
 const useYoloClassification = () => {
   const dispatch = useDispatch();
-  const { loading, result, error } = useSelector((state) => state.ai);
+  const { loading, error } = useSelector((state) => state.ai);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [downloadUrl, setDownloadUrl] = useState(null);
+  const [result, setResult] = useState(null); // ✅ 추가됨
 
   // ✅ 로컬 스토리지에서 액세스 토큰 가져오기 (최적화)
   const getAccessToken = () => localStorage.getItem('accessToken');
@@ -75,16 +76,24 @@ const useYoloClassification = () => {
 
   // ✅ YOLO 처리 완료 후 결과 수신 (Socket.IO)
   useEffect(() => {
+    let isMounted = true;
+
     socket.on('file_processed', (data) => {
       console.log('✅ YOLO 처리 완료!', data);
 
-      // ✅ YOLO 결과를 상태로 업데이트
-      setPreview(data.file_url);
-      setDownloadUrl(data.download_url);
+      if (isMounted) {
+        setResult({
+          // filename: data.file_url.split('/').pop(),
+          predicted_class: data.predicted_class || 'N/A',
+          confidence: data.confidence ? `${data.confidence}%` : 'N/A',
+        });
+
+        setDownloadUrl(data.download_url); // ✅ 수정됨
+      }
     });
 
-    // ✅ Cleanup: 컴포넌트 언마운트 시 이벤트 리스너 제거
     return () => {
+      isMounted = false;
       socket.off('file_processed');
     };
   }, []);
@@ -93,6 +102,7 @@ const useYoloClassification = () => {
     file,
     preview,
     downloadUrl,
+    setDownloadUrl, // ✅ 추가됨
     result,
     error,
     loading,
