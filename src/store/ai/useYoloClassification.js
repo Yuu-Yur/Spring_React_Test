@@ -4,8 +4,12 @@ import { uploadImageRequest } from '../../store/ai/aiSlice';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
-// ✅ Socket.IO 클라이언트 설정
-const socket = io('http://localhost:5000');
+// ✅ CORS 정책을 고려한 Socket.IO 클라이언트 설정
+const socket = io('http://localhost:5000', {
+  transports: ['websocket'], // ✅ 웹소켓만 사용 (불필요한 HTTP 폴백 방지)
+  // reconnectionAttempts: 5, // ✅ 재연결 시도 횟수 제한
+  // reconnectionDelay: 1000, // ✅ 재연결 간격 1초
+});
 
 const useYoloClassification = () => {
   const dispatch = useDispatch();

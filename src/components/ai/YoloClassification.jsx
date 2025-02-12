@@ -20,12 +20,15 @@ const YoloClassification = () => {
   const [processing, setProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState('파일을 업로드하세요.');
 
-  useEffect(() => {
-    // ✅ 컴포넌트가 마운트될 때만 Socket.IO 연결
+  // ✅ 파일 업로드 후 데이터 처리 중 상태로 변경
+  const handleUploadWithProcessing = async () => {
+    setProcessing(true);
+    setStatusMessage('⏳ 데이터 처리 중...');
+
+    // ✅ 버튼 클릭 후 소켓 동적 생성
     const socket = io('http://localhost:5000', {
-      transports: ['websocket'], // 웹소켓만 사용하도록 설정 (불필요한 HTTP 폴백 방지)
-      reconnectionAttempts: 5, // 5번까지 자동 재연결 시도
-      reconnectionDelay: 1000, // 재연결 시 1초 대기
+      transports: ['websocket'], // 웹소켓만 사용하도록 설정
+      reconnection: false, // ✅ 자동 재연결 비활성화
     });
 
     // ✅ YOLO 처리 완료 시 결과 수신
@@ -42,21 +45,13 @@ const YoloClassification = () => {
       if (data.file_url && data.file_url.match(/\.(jpeg|jpg|png|gif)$/i)) {
         setResult({ ...result, preview: data.file_url });
       }
+
+      // ✅ 처리 완료 후 소켓 해제
+      socket.disconnect();
     });
 
-    // ✅ Cleanup: 컴포넌트 언마운트 시 이벤트 리스너 및 소켓 해제
-    return () => {
-      socket.off('file_processed');
-      socket.disconnect();
-    };
-  }, [setDownloadUrl]);
-
-  // ✅ 파일 업로드 후 데이터 처리 중 상태로 변경
-  const handleUploadWithProcessing = async () => {
-    setProcessing(true);
-    setStatusMessage('⏳ 데이터 처리 중...');
-
-    await handleUpload(); // 기존 업로드 함수 실행
+    // ✅ 기존 업로드 함수 실행
+    await handleUpload();
   };
 
   return (
