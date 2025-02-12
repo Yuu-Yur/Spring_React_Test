@@ -1,5 +1,4 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import axios from 'axios';
 import {
   uploadImageRequest,
   uploadImageSuccess,
@@ -15,7 +14,7 @@ import axiosInstance from '../../util/axiosInstance';
 
 // API 요청 함수
 function uploadImageAPI(formData, type = 1) {
-  let endpoint = `/ai/predict/${type}`;
+  let endpoint = `/ai/predict/${type || 1}`;
   return axiosInstance.post(endpoint, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
@@ -41,7 +40,7 @@ function* fetchStockDataSaga(action) {
       axiosInstance.get,
       `/ai2/stock-data?period=${action.payload}`, // ✅ Base URL 적용됨
     );
-    yield put(fetchStockDataSuccess(response.data));
+    yield put(fetchStockDataSuccess(response.data || []));
   } catch (error) {
     yield put(fetchStockDataFailure(error.message));
   }
@@ -54,7 +53,9 @@ function* predictSaga(action) {
 
   try {
     const response = yield call(axiosInstance.post, apiUrl, { data, period });
-    yield put(predictSuccess({ model, prediction: response.data.prediction }));
+    yield put(
+      predictSuccess({ model, prediction: response.data.prediction || '' }),
+    );
   } catch (error) {
     yield put(predictFailure(error.message));
   }

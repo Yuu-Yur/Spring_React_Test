@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { io } from 'socket.io-client';
-import useYoloClassification from '../../store/ai/useYoloClassification'; // ✅ 경로 확인
+import useYoloClassification from '../../store/ai/useYoloClassification'; // ✅ 커스텀 훅 가져오기
 import './css/ai.css';
-
-const socket = io('http://localhost:5000'); // ✅ Socket.IO 서버 주소
 
 const YoloClassification = () => {
   const {
@@ -19,6 +17,13 @@ const YoloClassification = () => {
   } = useYoloClassification();
 
   useEffect(() => {
+    // ✅ 컴포넌트가 마운트될 때만 Socket.IO 연결
+    const socket = io('http://localhost:5000', {
+      transports: ['websocket'], // 웹소켓만 사용하도록 설정 (불필요한 HTTP 폴백 방지)
+      reconnectionAttempts: 5, // 5번까지 자동 재연결 시도
+      reconnectionDelay: 1000, // 재연결 시 1초 대기
+    });
+
     // ✅ YOLO 처리 완료 시 결과 수신
     socket.on('file_processed', (data) => {
       console.log('✅ YOLO 처리 완료!', data);
@@ -26,17 +31,18 @@ const YoloClassification = () => {
       // ✅ 상태 업데이트 (UI 갱신)
       setResult({
         filename: data.file_url.split('/').pop(), // 파일명 추출
-        predicted_class: 'N/A', // YOLO 결과에 따라 수정 가능
-        confidence: 'N/A', // YOLO 결과에 따라 수정 가능
+        predicted_class: data.predicted_class || 'N/A', // YOLO 결과가 있다면 적용
+        confidence: data.confidence ? `${data.confidence}%` : 'N/A', // YOLO 결과가 있다면 적용
       });
       setDownloadUrl(data.download_url);
     });
 
-    // ✅ Cleanup: 컴포넌트 언마운트 시 이벤트 리스너 제거
+    // ✅ Cleanup: 컴포넌트 언마운트 시 이벤트 리스너 및 소켓 해제
     return () => {
       socket.off('file_processed');
+      socket.disconnect();
     };
-  }, []);
+  }, [setResult, setDownloadUrl]); // ⚠️ setResult, setDownloadUrl이 변경될 때만 실행
 
   return (
     <div className="tool-classification">

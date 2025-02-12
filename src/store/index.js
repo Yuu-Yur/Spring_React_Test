@@ -11,14 +11,20 @@ const sagaMiddleware = createSagaMiddleware();
 // ✅ Redux Store 생성
 const store = configureStore({
   reducer: {
-    // ✅ todo 관련 상태를 `todoSlice.js`에서 관리,
-    // todoSlice.js에서 가져온 리듀서를 Redux Store에 연결
     todo: todoReducer,
-    //추가
     ai: aiReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(sagaMiddleware), // ✅ 기본 미들웨어 + Saga 추가
+    getDefaultMiddleware({
+      serializableCheck: {
+        // ✅ 특정 액션을 직렬화 검사에서 제외 (FormData 사용되는 액션)
+        ignoredActions: ['ai/uploadImageRequest'],
+        // ✅ 모든 액션에서 특정 필드를 검사하지 않음
+        ignoredActionPaths: ['meta.formData'],
+        // ✅ Redux 상태에서 특정 필드 무시 (필요 시 적용)
+        ignoredPaths: ['ai.upload.formData'],
+      },
+    }).concat(sagaMiddleware), // ✅ 기본 미들웨어 + Saga 추가
 });
 
 // ✅ Redux-Saga 실행, takeLatest를 통해 비동기 작업 감지

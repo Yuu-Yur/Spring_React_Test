@@ -13,6 +13,7 @@ const useYoloClassification = () => {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [downloadUrl, setDownloadUrl] = useState(null);
+  const [resultState, setResult] = useState(null); // ✅ 추가
 
   // ✅ 로컬 스토리지에서 액세스 토큰 가져오기 (최적화)
   const getAccessToken = () => localStorage.getItem('accessToken');
@@ -27,6 +28,14 @@ const useYoloClassification = () => {
       setPreview(objectUrl);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview); // ✅ 메모리 누수 방지
+      }
+    };
+  }, [preview]);
 
   // ✅ 파일 업로드 핸들러 (비동기 요청)
   const handleUpload = async () => {
@@ -56,7 +65,7 @@ const useYoloClassification = () => {
       console.log('📌 서버 응답:', response.data);
 
       // ✅ Redux로 업로드 상태 관리
-      dispatch(uploadImageRequest(formData));
+      dispatch(uploadImageRequest(undefined, formData, 4)); // ✅ 수정된 Redux 액션
 
       // ✅ 업로드 성공 후 상태 업데이트
       setPreview(response.data.file_url);
@@ -68,12 +77,19 @@ const useYoloClassification = () => {
 
   // ✅ YOLO 처리 완료 후 결과 수신 (Socket.IO)
   useEffect(() => {
+    let isMounted = true;
+
     socket.on('file_processed', (data) => {
       console.log('✅ YOLO 처리 완료!', data);
 
-      // ✅ YOLO 결과를 상태로 업데이트
-      setPreview(data.file_url);
-      setDownloadUrl(data.download_url);
+      if (isMounted) {
+        setResult({
+          filename: data.file_url.split('/').pop(),
+          predicted_class: data.predicted_class || 'N/A',
+          confidence: data.confidence ? `${data.confidence}%` : 'N/A',
+        });
+        setDownloadUrl(data.download_url);
+      }
     });
 
     // ✅ Cleanup: 컴포넌트 언마운트 시 이벤트 리스너 제거
@@ -86,7 +102,9 @@ const useYoloClassification = () => {
     file,
     preview,
     downloadUrl,
+    setDownloadUrl, // ✅ 추가
     result,
+    setResult, // ✅ 추가
     error,
     loading,
     handleFileChange,
