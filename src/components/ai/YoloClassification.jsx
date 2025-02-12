@@ -29,11 +29,11 @@ const YoloClassification = () => {
       console.log('✅ YOLO 처리 완료!', data);
 
       // ✅ 상태 업데이트 (UI 갱신)
-      setResult({
-        filename: data.file_url.split('/').pop(), // 파일명 추출
-        predicted_class: data.predicted_class || 'N/A', // YOLO 결과가 있다면 적용
-        confidence: data.confidence ? `${data.confidence}%` : 'N/A', // YOLO 결과가 있다면 적용
-      });
+      // setResult({
+      //   filename: data.file_url.split('/').pop(), // 파일명 추출
+      //   predicted_class: data.predicted_class || 'N/A', // YOLO 결과가 있다면 적용
+      //   confidence: data.confidence ? `${data.confidence}%` : 'N/A', // YOLO 결과가 있다면 적용
+      // });
       setDownloadUrl(data.download_url);
     });
 
@@ -70,22 +70,6 @@ const YoloClassification = () => {
       <button onClick={handleUpload} disabled={loading}>
         {loading ? '업로드 중...' : '파일 업로드'}
       </button>
-
-      {/* ✅ 결과 표시 */}
-      {result && (
-        <div className="result">
-          <h4>📌 분석 결과</h4>
-          <p>
-            <strong>파일명:</strong> {result.filename}
-          </p>
-          <p>
-            <strong>예측된 클래스:</strong> {result.predicted_class}
-          </p>
-          <p>
-            <strong>신뢰도:</strong> {result.confidence}
-          </p>
-        </div>
-      )}
 
       {/* ✅ 다운로드 링크 */}
       {downloadUrl && (

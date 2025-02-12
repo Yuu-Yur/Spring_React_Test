@@ -49,7 +49,7 @@ function* fetchStockDataSaga(action) {
 // ✅ AI 예측 요청
 function* predictSaga(action) {
   const { model, data, period } = action.payload;
-  const apiUrl = `/ai2/predict/${model.toLowerCase()}`; // ✅ Base URL 적용됨
+  const apiUrl = `/ai/predict/${model.toLowerCase()}`; // ✅ Base URL 적용됨
 
   try {
     const response = yield call(axiosInstance.post, apiUrl, { data, period });
