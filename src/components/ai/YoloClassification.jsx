@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import useYoloClassification from '../../store/ai/useYoloClassification'; // ✅ 커스텀 훅 가져오기
 import './css/ai.css';
@@ -16,6 +16,10 @@ const YoloClassification = () => {
     handleUpload,
   } = useYoloClassification();
 
+  // ✅ 파일 업로드 후 데이터 처리 상태 추가
+  const [processing, setProcessing] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('파일을 업로드하세요.');
+
   useEffect(() => {
     // ✅ 컴포넌트가 마운트될 때만 Socket.IO 연결
     const socket = io('http://localhost:5000', {
@@ -28,12 +32,10 @@ const YoloClassification = () => {
     socket.on('file_processed', (data) => {
       console.log('✅ YOLO 처리 완료!', data);
 
-      // ✅ 상태 업데이트 (UI 갱신)
-      // setResult({
-      //   filename: data.file_url.split('/').pop(), // 파일명 추출
-      //   predicted_class: data.predicted_class || 'N/A', // YOLO 결과가 있다면 적용
-      //   confidence: data.confidence ? `${data.confidence}%` : 'N/A', // YOLO 결과가 있다면 적용
-      // });
+      // ✅ 데이터 처리 완료 상태로 변경
+      setProcessing(false);
+      setStatusMessage('✅ 분석 완료! 다운로드 가능');
+
       setDownloadUrl(data.download_url);
     });
 
@@ -42,7 +44,15 @@ const YoloClassification = () => {
       socket.off('file_processed');
       socket.disconnect();
     };
-  }, [setResult, setDownloadUrl]); // ⚠️ setResult, setDownloadUrl이 변경될 때만 실행
+  }, [setDownloadUrl]);
+
+  // ✅ 파일 업로드 후 데이터 처리 중 상태로 변경
+  const handleUploadWithProcessing = async () => {
+    setProcessing(true);
+    setStatusMessage('⏳ 데이터 처리 중...');
+
+    await handleUpload(); // 기존 업로드 함수 실행
+  };
 
   return (
     <div className="tool-classification">
@@ -67,11 +77,18 @@ const YoloClassification = () => {
         </div>
       )}
 
-      <button onClick={handleUpload} disabled={loading}>
+      {/* ✅ 업로드 버튼 */}
+      <button
+        onClick={handleUploadWithProcessing}
+        disabled={loading || processing}
+      >
         {loading ? '업로드 중...' : '파일 업로드'}
       </button>
 
-      {/* ✅ 다운로드 링크 */}
+      {/* ✅ 상태 메시지 표시 */}
+      <p className="status-message">{statusMessage}</p>
+
+      {/* ✅ 다운로드 링크 (완료 후 표시) */}
       {downloadUrl && (
         <div className="download-section">
           <h4>📥 다운로드</h4>
