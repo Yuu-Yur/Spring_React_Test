@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { uploadImageRequest } from '../../store/ai/aiSlice';
+import { uploadImageRequest, uploadImageSuccess } from '../../store/ai/aiSlice';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
@@ -84,7 +84,8 @@ const useYoloClassification = () => {
 
     socket.on('file_processed', (data) => {
       console.log('✅ YOLO 처리 완료!', data);
-
+      // ✅ Redux 상태 업데이트 (loading: false)
+      dispatch(uploadImageSuccess(data));
       if (isMounted) {
         setResult({
           // filename: data.file_url.split('/').pop(),

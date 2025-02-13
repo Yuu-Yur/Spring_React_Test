@@ -2,11 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import useYoloClassification from '../../store/ai/useYoloClassification'; // ✅ 커스텀 훅 가져오기
 import './css/ai.css';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { uploadImageSuccess } from '../../store/ai/aiSlice';
+
+const socket = io('http://localhost:5000', {
+  transports: ['websocket'], // ✅ 웹소켓만 사용
+  reconnection: false, // ✅ 자동 재연결 비활성화
+});
 
 const YoloClassification = () => {
   const dispatch = useDispatch(); // ✅ Redux 디스패치 추가
+  const { loading } = useSelector((state) => state.ai);
 
   const {
     preview,
@@ -15,7 +21,7 @@ const YoloClassification = () => {
     result,
     setResult, // ✅ YOLO 분석 결과 상태 추가
     error,
-    loading,
+    // loading,
     handleFileChange,
     handleUpload,
   } = useYoloClassification();
@@ -24,42 +30,71 @@ const YoloClassification = () => {
   const [processing, setProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState('파일을 업로드하세요.');
 
-  // ✅ 파일 업로드 후 데이터 처리 중 상태로 변경
-  const handleUploadWithProcessing = async () => {
-    setProcessing(true);
-    setStatusMessage('⏳ 데이터 처리 중...');
+  // // ✅ 파일 업로드 후 데이터 처리 중 상태로 변경
+  // const handleUploadWithProcessing = async () => {
+  //   setProcessing(true);
+  //   setStatusMessage('⏳ 데이터 처리 중...');
 
-    // ✅ 버튼 클릭 후 소켓 동적 생성
-    const socket = io('http://localhost:5000', {
-      transports: ['websocket'], // 웹소켓만 사용하도록 설정
-      reconnection: false, // ✅ 자동 재연결 비활성화
-    });
+  //   // ✅ 버튼 클릭 후 소켓 동적 생성
+  //   const socket = io('http://localhost:5000', {
+  //     transports: ['websocket'], // 웹소켓만 사용하도록 설정
+  //     reconnection: false, // ✅ 자동 재연결 비활성화
+  //   });
 
-    // ✅ YOLO 처리 완료 시 결과 수신
+  //   // ✅ YOLO 처리 완료 시 결과 수신
+  //   socket.on('file_processed', (data) => {
+  //     console.log('✅ YOLO 처리 완료!', data);
+
+  //     // ✅ Redux 상태 업데이트 (loading: false)
+  //     dispatch(uploadImageSuccess(data));
+
+  //     // ✅ 데이터 처리 완료 상태로 변경
+  //     setProcessing(false);
+
+  //     setStatusMessage('✅ 분석 완료! 다운로드 가능');
+
+  //     setDownloadUrl(data.download_url);
+
+  //     // ✅ 이미지 파일인 경우 미리보기 표시
+  //     if (data.file_url && data.file_url.match(/\.(jpeg|jpg|png|gif)$/i)) {
+  //       setResult({ ...result, preview: data.file_url });
+  //     }
+
+  //     // ✅ 처리 완료 후 소켓 해제
+  //     socket.disconnect();
+  //   });
+
+  //   // ✅ 기존 업로드 함수 실행
+  //   await handleUpload();
+  // };
+  useEffect(() => {
     socket.on('file_processed', (data) => {
       console.log('✅ YOLO 처리 완료!', data);
 
-      // ✅ Redux 상태 업데이트 (loading: false)
       dispatch(uploadImageSuccess(data));
 
       // ✅ 데이터 처리 완료 상태로 변경
       setProcessing(false);
 
       setStatusMessage('✅ 분석 완료! 다운로드 가능');
-
-      setDownloadUrl(data.download_url);
-
-      // ✅ 이미지 파일인 경우 미리보기 표시
-      if (data.file_url && data.file_url.match(/\.(jpeg|jpg|png|gif)$/i)) {
-        setResult({ ...result, preview: data.file_url });
-      }
-
-      // ✅ 처리 완료 후 소켓 해제
-      socket.disconnect();
     });
 
-    // ✅ 기존 업로드 함수 실행
-    await handleUpload();
+    return () => {
+      socket.off('file_processed');
+    };
+  }, [dispatch]);
+
+  const handleUploadWithProcessing = async () => {
+    setProcessing(true);
+    setStatusMessage('⏳ 데이터 처리 중...');
+
+    try {
+      await handleUpload();
+      setStatusMessage('📡 YOLO 분석 중...');
+    } catch (error) {
+      setProcessing(false);
+      setStatusMessage('❌ 파일 업로드 실패');
+    }
   };
 
   return (
