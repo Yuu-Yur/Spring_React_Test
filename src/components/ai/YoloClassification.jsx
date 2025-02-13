@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import useYoloClassification from '../../store/ai/useYoloClassification'; // ✅ 커스텀 훅 가져오기
 import './css/ai.css';
+import { useDispatch } from 'react-redux';
+import { uploadImageSuccess } from '../../store/ai/aiSlice';
 
 const YoloClassification = () => {
+  const dispatch = useDispatch(); // ✅ Redux 디스패치 추가
+
   const {
     preview,
     downloadUrl,
@@ -35,8 +39,12 @@ const YoloClassification = () => {
     socket.on('file_processed', (data) => {
       console.log('✅ YOLO 처리 완료!', data);
 
+      // ✅ Redux 상태 업데이트 (loading: false)
+      dispatch(uploadImageSuccess(data));
+
       // ✅ 데이터 처리 완료 상태로 변경
       setProcessing(false);
+
       setStatusMessage('✅ 분석 완료! 다운로드 가능');
 
       setDownloadUrl(data.download_url);
