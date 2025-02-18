@@ -77,7 +77,7 @@ const AiTest = () => {
                     onClick={() => setSelectedMenu(5)}
                     active={selectedMenu === 5}
                   >
-                    5. Yolov8 분류
+                    5. Yolov8 분류(로컬에서만, 이미지, 동영상둘다)
                   </Nav.Link>
                 </Nav>
               </Col>
