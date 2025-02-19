@@ -41,6 +41,7 @@ const useYoloClassification = () => {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
+          timeout: 60000,  // ✅ 60초 타임아웃 설정
         },
       );
 
