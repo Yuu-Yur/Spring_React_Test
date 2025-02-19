@@ -5,97 +5,38 @@ import './css/ai.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadImageSuccess } from '../../store/ai/aiSlice';
 
-const socket = io('http://localhost:5000', {
-  transports: ['websocket'], // ✅ 웹소켓만 사용
-  reconnection: false, // ✅ 자동 재연결 비활성화
-});
-
 const YoloClassification = () => {
-  const dispatch = useDispatch(); // ✅ Redux 디스패치 추가
+  const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.ai);
 
-  const {
-    preview,
-    downloadUrl,
-    setDownloadUrl, // ✅ 다운로드 URL을 저장하는 상태 추가
-    result,
-    setResult, // ✅ YOLO 분석 결과 상태 추가
-    error,
-    // loading,
-    handleFileChange,
-    handleUpload,
-  } = useYoloClassification();
+  const { preview, downloadUrl, handleFileChange, handleUpload } =
+    useYoloClassification();
 
-  // ✅ 파일 업로드 후 데이터 처리 상태 추가
   const [processing, setProcessing] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('파일을 업로드하세요.');
-
-  // // ✅ 파일 업로드 후 데이터 처리 중 상태로 변경
-  // const handleUploadWithProcessing = async () => {
-  //   setProcessing(true);
-  //   setStatusMessage('⏳ 데이터 처리 중...');
-
-  //   // ✅ 버튼 클릭 후 소켓 동적 생성
-  //   const socket = io('http://localhost:5000', {
-  //     transports: ['websocket'], // 웹소켓만 사용하도록 설정
-  //     reconnection: false, // ✅ 자동 재연결 비활성화
-  //   });
-
-  //   // ✅ YOLO 처리 완료 시 결과 수신
-  //   socket.on('file_processed', (data) => {
-  //     console.log('✅ YOLO 처리 완료!', data);
-
-  //     // ✅ Redux 상태 업데이트 (loading: false)
-  //     dispatch(uploadImageSuccess(data));
-
-  //     // ✅ 데이터 처리 완료 상태로 변경
-  //     setProcessing(false);
-
-  //     setStatusMessage('✅ 분석 완료! 다운로드 가능');
-
-  //     setDownloadUrl(data.download_url);
-
-  //     // ✅ 이미지 파일인 경우 미리보기 표시
-  //     if (data.file_url && data.file_url.match(/\.(jpeg|jpg|png|gif)$/i)) {
-  //       setResult({ ...result, preview: data.file_url });
-  //     }
-
-  //     // ✅ 처리 완료 후 소켓 해제
-  //     socket.disconnect();
-  //   });
-
-  //   // ✅ 기존 업로드 함수 실행
-  //   await handleUpload();
-  // };
-  useEffect(() => {
-    socket.on('file_processed', (data) => {
-      console.log('✅ YOLO 처리 완료!', data);
-
-      dispatch(uploadImageSuccess(data));
-
-      // ✅ 데이터 처리 완료 상태로 변경
-      setProcessing(false);
-
-      setStatusMessage('✅ 분석 완료! 다운로드 가능');
-    });
-
-    return () => {
-      socket.off('file_processed');
-    };
-  }, [dispatch]);
+  const [statusMessage, setStatusMessage] = useState('📂 파일을 업로드하세요.');
 
   const handleUploadWithProcessing = async () => {
     setProcessing(true);
     setStatusMessage('⏳ 데이터 처리 중...');
 
     try {
-      await handleUpload();
-      setStatusMessage('📡 YOLO 분석 중...');
+      const uploadResult = await handleUpload();
+
+      if (uploadResult) {
+        setProcessing(false);
+        setTimeout(() => setStatusMessage('✅ YOLO 분석 완료!'), 100);
+      }
     } catch (error) {
       setProcessing(false);
       setStatusMessage('❌ 파일 업로드 실패');
     }
   };
+
+  useEffect(() => {
+    if (!processing) {
+      setStatusMessage('✅ YOLO 분석 완료!');
+    }
+  }, [processing]);
 
   return (
     <div className="tool-classification">
@@ -125,7 +66,7 @@ const YoloClassification = () => {
         onClick={handleUploadWithProcessing}
         disabled={loading || processing}
       >
-        {loading ? '업로드 중...' : '파일 업로드'}
+        {loading || processing ? '⏳ 업로드 중...' : '📤 파일 업로드'}
       </button>
 
       {/* ✅ 상태 메시지 표시 */}
@@ -140,9 +81,6 @@ const YoloClassification = () => {
           </a>
         </div>
       )}
-
-      {/* 에러 표시 */}
-      {/* {error && <p className="error">❌ 오류: {error}</p>} */}
     </div>
   );
 };
